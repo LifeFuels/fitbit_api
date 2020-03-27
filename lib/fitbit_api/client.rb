@@ -10,11 +10,12 @@ require 'fitbit_api/friends'
 require 'fitbit_api/sleep'
 require 'fitbit_api/user'
 require 'fitbit_api/water'
+require 'fitbit_api/subscription'
 
 module FitbitAPI
   class Client
     attr_accessor :api_version, :unit_system, :locale, :scope,
-                  :snake_case_keys, :symbolize_keys
+                  :snake_case_keys, :symbolize_keys, :state
     attr_reader   :user_id
 
     def initialize(opts={})
@@ -25,7 +26,11 @@ module FitbitAPI
     end
 
     def auth_url
-      @client.auth_code.authorize_url(redirect_uri: @redirect_uri, scope: @scope)
+      @client.auth_code.authorize_url(
+        redirect_uri: @redirect_uri,
+        scope: @scope,
+        state: @state
+      )
     end
 
     def get_token(auth_code)
@@ -102,7 +107,7 @@ module FitbitAPI
 
     def assign_attrs(opts)
       attrs = %i[client_id client_secret redirect_uri site_url
-                 authorize_url token_url unit_system locale scope
+                 authorize_url token_url unit_system locale scope state
                  api_version snake_case_keys symbolize_keys].freeze
 
       attrs.each do |attr|
