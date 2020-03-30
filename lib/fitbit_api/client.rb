@@ -120,7 +120,7 @@ module FitbitAPI
     def assign_attrs(opts)
       attrs = %i[client_id client_secret redirect_uri site_url
                  authorize_url token_url unit_system locale scope
-                 api_version snake_case_keys symbolize_keys].freeze
+                 state api_version snake_case_keys symbolize_keys].freeze
 
       attrs.each do |attr|
         instance_variable_set("@#{attr}", (opts[attr] || FitbitAPI.send(attr)))
