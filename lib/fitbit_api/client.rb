@@ -15,7 +15,8 @@ require 'fitbit_api/subscription'
 module FitbitAPI
   class Client
     attr_accessor :api_version, :unit_system, :locale, :scope,
-                  :snake_case_keys, :symbolize_keys, :state
+                  :snake_case_keys, :symbolize_keys, :state,
+                  :subscriber_id
     attr_reader   :user_id
 
     def initialize(opts={})
@@ -57,29 +58,40 @@ module FitbitAPI
       { 'Authorization' => ('Basic ' + Base64.encode64(@client_id + ':' + @client_secret)) }
     end
 
-    def request_headers
-      {
+    def request_headers(sub = false)
+      res = {
         'User-Agent' => "fitbit_api-#{FitbitAPI::VERSION} gem (#{FitbitAPI::REPO_URL})",
         'Accept-Language' => @unit_system,
         'Accept-Locale' => @locale
+      }
+      res.merge!(subscription_header) if sub
+      res
+    end
+
+    def subscription_header
+      {
+        'X-Fitbit-Subscriber-Id' => @subscriber_id
       }
     end
 
     def get(path, opts={})
       params = opts.delete(:params) || {}
-      response = token.get(("#{@api_version}/" + path), params: deep_keys_to_camel_case!(params), headers: request_headers).response
+      sub = (opts[:subscription] && !@subscriber_id.nil?) || false
+      response = token.get(("#{@api_version}/" + path), params: deep_keys_to_camel_case!(params), headers: request_headers(sub)).response
       object = MultiJson.load(response.body) unless response.status == 204
       process_keys!(object, opts)
     end
 
     def post(path, opts={})
-      response = token.post(("#{@api_version}/" + path), body: deep_keys_to_camel_case!(opts), headers: request_headers).response
+      sub = (opts[:subscription] && !@subscriber_id.nil?) || false
+      response = token.post(("#{@api_version}/" + path), body: deep_keys_to_camel_case!(opts), headers: request_headers(sub)).response
       object = MultiJson.load(response.body) unless response.status == 204
       process_keys!(object, opts)
     end
 
     def delete(path, opts={})
-      response = token.delete(("#{@api_version}/" + path), headers: request_headers).response
+      sub = (opts[:subscription] && !@subscriber_id.nil?) || false
+      response = token.delete(("#{@api_version}/" + path), headers: request_headers(sub)).response
       object = MultiJson.load(response.body) unless response.status == 204
       process_keys!(object, opts)
     end
@@ -107,7 +119,7 @@ module FitbitAPI
 
     def assign_attrs(opts)
       attrs = %i[client_id client_secret redirect_uri site_url
-                 authorize_url token_url unit_system locale scope state
+                 authorize_url token_url unit_system locale scope
                  api_version snake_case_keys symbolize_keys].freeze
 
       attrs.each do |attr|
