@@ -23,4 +23,5 @@ module FitbitAPI
   define_setting :symbolize_keys,  false
 
   define_setting :state,           ''
+  define_setting :fs_id,           0
 end

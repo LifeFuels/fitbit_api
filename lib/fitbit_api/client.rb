@@ -16,7 +16,7 @@ module FitbitAPI
   class Client
     attr_accessor :api_version, :unit_system, :locale, :scope,
                   :snake_case_keys, :symbolize_keys, :state,
-                  :subscriber_id
+                  :subscriber_id, :fs_id
     attr_reader   :user_id
 
     def initialize(opts={})
@@ -119,7 +119,7 @@ module FitbitAPI
 
     def assign_attrs(opts)
       attrs = %i[client_id client_secret redirect_uri site_url
-                 authorize_url token_url unit_system locale scope
+                 authorize_url token_url unit_system locale scope fs_id
                  state api_version snake_case_keys symbolize_keys].freeze
 
       attrs.each do |attr|
