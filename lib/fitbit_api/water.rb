@@ -6,7 +6,11 @@ module FitbitAPI
 
     ##
     # POST Methods
-    def log_water(date=Date.today, opts={})
+    def log_water(ml_amount, date=Date.today, opts={})
+      return nil if ml_amount.nil? || ml_amount.zero?
+      opts[:amount] = ml_amount
+      opts[:date] = format_date(date)
+      opts[:unit] = 'ml'
       post("user/#{user_id}/foods/log/water.json", opts)
     end
   end
