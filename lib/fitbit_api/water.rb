@@ -24,13 +24,11 @@ module FitbitAPI
       # First determine the water goal unit
       res = self.profile
       return nil if res[:user].nil?
-      unit = res[:user][:water_unit_name]
-      if unit == 'ml'
-        amount = ml_amount
-      elsif unit == 'fl oz'
-        amount = ml_amount * 0.033814
+      locale = res[:user][:locale]
+      if locale == 'en_US'
+        amount = ml_amount.to_f / 0.033814
       else
-        return nil
+        amount = ml_amount
       end
       opts[:target] = amount
       post("user/#{user_id}/foods/log/water/goal.json", opts)
