@@ -26,7 +26,7 @@ module FitbitAPI
       return nil if res[:user].nil?
       locale = res[:user][:locale]
       if locale == 'en_US'
-        amount = ml_amount.to_f / 0.033814
+        amount = ml_amount.to_f * 0.033814
       else
         amount = ml_amount
       end
