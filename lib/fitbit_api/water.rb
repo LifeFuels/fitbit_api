@@ -17,6 +17,7 @@ module FitbitAPI
     def update_water_log(log_id, ml_amount, opts={})
       opts[:amount] = ml_amount
       opts[:unit] = 'ml'
+      opts[:use_ml] = true
       post("user/#{user_id}/foods/log/water/#{log_id}.json", opts)
     end
 

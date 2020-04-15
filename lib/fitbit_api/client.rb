@@ -58,12 +58,12 @@ module FitbitAPI
       { 'Authorization' => ('Basic ' + Base64.encode64(@client_id + ':' + @client_secret)) }
     end
 
-    def request_headers(sub = false)
+    def request_headers(sub = false, use_unit_system = true)
       res = {
         'User-Agent' => "fitbit_api-#{FitbitAPI::VERSION} gem (#{FitbitAPI::REPO_URL})",
-        'Accept-Language' => @unit_system,
         'Accept-Locale' => @locale
       }
+      res['Accept-Language'] = @unit_system if use_unit_system
       res.merge!(subscription_header) if sub
       res
     end
@@ -83,14 +83,18 @@ module FitbitAPI
     end
 
     def post(path, opts={})
-      sub = (opts[:subscription] && !@subscriber_id.nil?) || false
-      response = token.post(("#{@api_version}/" + path), body: deep_keys_to_camel_case!(opts), headers: request_headers(sub)).response
+      sub = opts.delete(:subscription)
+      sub = (sub && !@subscriber_id.nil?) || false
+      use_ml = opts.delete(:use_ml)
+      use_unit_system = use_ml.nil? ? true : !:use_ml
+      response = token.post(("#{@api_version}/" + path), body: deep_keys_to_camel_case!(opts), headers: request_headers(sub, use_unit_system)).response
       object = MultiJson.load(response.body) unless response.status == 204
       process_keys!(object, opts)
     end
 
     def delete(path, opts={})
-      sub = (opts[:subscription] && !@subscriber_id.nil?) || false
+      sub = opts.delete(:subscription)
+      sub = (sub && !@subscriber_id.nil?) || false
       response = token.delete(("#{@api_version}/" + path), headers: request_headers(sub)).response
       object = MultiJson.load(response.body) unless response.status == 204
       process_keys!(object, opts)
