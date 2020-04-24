@@ -54,6 +54,15 @@ module FitbitAPI
       @token
     end
 
+    def revoke_token!
+      token
+      response = @token.post("oauth2/revoke", headers: auth_header, body: {token: @token.token})
+      # Successful response is status = 200 and body = {}
+      object = MultiJson.load(response.body) unless response.status == 204
+      return true if response.status == 200 && object == {}
+      return false, object
+    end
+
     def auth_header
       { 'Authorization' => ('Basic ' + Base64.encode64(@client_id + ':' + @client_secret)) }
     end
